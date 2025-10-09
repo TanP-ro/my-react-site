@@ -842,41 +842,51 @@ ul {
 
 .btn {
   padding: 10px 20px;
-  border: none;
+  border: 2px solid; /* добавляем бордер */
   border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  background: transparent; /* без фона */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Теплый персиковый бордер */
 .btn-primary {
-  background-color: #007bff;
-  color: #fff;
+  border-color: #d4a373;
+  color: #d4a373;
 }
 .btn-primary:hover {
-  background-color: #0069d9;
+  background-color: #d4a373;
+  color: #fff;
 }
 
+/* Теплый карамельный бордер */
 .btn-success {
-  background-color: #28a745;
-  color: #fff;
+  border-color: #c79b7b;
+  color: #c79b7b;
 }
 .btn-success:hover {
-  background-color: #218838;
+  background-color: #c79b7b;
+  color: #fff;
 }
 
+/* Мягкий бежевый бордер */
 .btn-secondary {
-  background-color: #6c757d;
-  color: #fff;
+  border-color: #d2b48c;
+  color: #d2b48c;
 }
 .btn-secondary:hover {
-  background-color: #5a6268;
-}
-
-.btn-danger {
-  background-color: #dc3545;
+  background-color: #d2b48c;
   color: #fff;
 }
+
+/* Теплый коралловый бордер */
+.btn-danger {
+  border-color: #e6a7a1;
+  color: #e6a7a1;
+}
 .btn-danger:hover {
-  background-color: #c82333;
+  background-color: #e6a7a1;
+  color: #fff;
 }

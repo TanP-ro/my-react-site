@@ -85,7 +85,6 @@ function ArticlesPage({ isAdmin }) {
       const newArticles = [...articles, newArticle];
       setArticles(newArticles);
       saveToLocalStorage(newArticles);
-      // Инициализация реакций для новой статьи
       setReactionCounts(prev => ({ ...prev, [newArticles.length - 1]: { '❤️': 0 } }));
       setNewArticleText('');
       setTempAttachments([]);
@@ -97,12 +96,9 @@ function ArticlesPage({ isAdmin }) {
     newArticles.splice(index, 1);
     setArticles(newArticles);
     saveToLocalStorage(newArticles);
-
-    // Обновляем реакции
     const newReactionCounts = { ...reactionCounts };
     delete newReactionCounts[index];
     setReactionCounts(newReactionCounts);
-
     const newUserReactions = { ...userReactions };
     delete newUserReactions[index];
     setUserReactions(newUserReactions);
@@ -165,11 +161,9 @@ function ArticlesPage({ isAdmin }) {
     let updatedReacts;
 
     if (isReacted) {
-      // Удаляем реакцию
       updatedReacts = userReactsForArticle.filter(r => r !== reaction);
       newCounts[reaction] = Math.max((newCounts[reaction] || 1) - 1, 0);
     } else {
-      // Добавляем реакцию
       updatedReacts = [...userReactsForArticle, reaction];
       newCounts[reaction] = (newCounts[reaction] || 0) + 1;
     }
@@ -216,64 +210,49 @@ function ArticlesPage({ isAdmin }) {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      {/* Форма добавления новой статьи */}
-      <h2>Добавить статью</h2>
-      <textarea
-        placeholder="Введите текст статьи..."
-        value={newArticleText}
-        onChange={(e) => setNewArticleText(e.target.value)}
-        rows={3}
-        style={{ width: '100%', resize: 'vertical' }}
-      />
-      <div style={{ marginTop: '10px' }}>
-        <button onClick={handleOpenFileDialog}>Прикрепить файлы</button>
-        <input
-          type="file"
-          multiple
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={(e) => handleAttachFileForNew(e.target.files)}
-        />
-        {tempAttachments.length > 0 && (
-          <div style={{ marginTop: '10px' }}>
-            <strong>Прикрепленные файлы:</strong>
-            <ul>
-              {tempAttachments.map((file, idx) => (
-                <li key={idx}>{getFileIcon(file.name)} {file.name}</li>
-              ))}
-            </ul>
+    <div style={styles.container}>
+      {/* Форма добавления статьи — только для админа */}
+      {isAdmin && (
+        <div style={styles.adminSection}>
+          <h2 style={styles.heading}>Добавить статью</h2>
+          <textarea
+            placeholder="Введите текст статьи..."
+            value={newArticleText}
+            onChange={(e) => setNewArticleText(e.target.value)}
+            rows={3}
+            style={styles.textarea}
+          />
+          <div style={styles.fileSection}>
+            <button style={styles.button} onClick={handleOpenFileDialog}>Прикрепить файлы</button>
+            <input
+              type="file"
+              multiple
+              ref={fileInputRef}
+              style={styles.fileInput}
+              onChange={(e) => handleAttachFileForNew(e.target.files)}
+            />
+            {tempAttachments.length > 0 && (
+              <div style={styles.attachmentsPreview}>
+                <strong>Прикрепленные файлы:</strong>
+                <ul style={styles.attachmentsList}>
+                  {tempAttachments.map((file, idx) => (
+                    <li key={idx}>{getFileIcon(file.name)} {file.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      <button onClick={handleAddArticle} style={{ marginTop: '10px' }}>Добавить статью</button>
+          <button style={styles.button} onClick={handleAddArticle}>Добавить статью</button>
+        </div>
+      )}
 
-      {/* Отображение статей */}
-      <h3 style={{ marginTop: '30px' }}>Статьи</h3>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '20px',
-          justifyContent: 'center'
-        }}
-      >
+      {/* Статьи */}
+      <h3 style={styles.sectionTitle}>Статьи</h3>
+      <div style={styles.articlesContainer}>
         {articles.map((article, index) => (
-          <div
-            key={index}
-            style={{
-              width: '100%',
-              maxWidth: '300px',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              background: '#fff'
-            }}
-          >
-            {/* Верхняя часть - изображение или слайдер */}
-            <div style={{ width: '100%', height: '200px', overflow: 'hidden' }}>
+          <div key={index} style={styles.articleCard}>
+            {/* Верхняя часть — изображение или слайдер */}
+            <div style={styles.imageContainer}>
               {article.attachments && article.attachments.length > 0 ? (
                 (() => {
                   const images = (article.attachments || []).filter(f => f.data && f.data.startsWith('data:image'));
@@ -285,41 +264,41 @@ function ArticlesPage({ isAdmin }) {
                       <img
                         src={images[0].data}
                         alt="img"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={styles.image}
                       />
                     );
                   } else if (otherFiles.length > 0) {
                     return (
-                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                      <div style={styles.filesPreview}>
                         {otherFiles.map((f, idx) => (
-                          <img key={idx} src={f.data} alt={f.name} style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                          <img key={idx} src={f.data} alt={f.name} style={styles.fileThumbnail} />
                         ))}
                       </div>
                     );
                   } else {
-                    return <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Нет изображений</div>;
+                    return <div style={styles.noImage}>Нет изображений</div>;
                   }
                 })()
               ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Нет изображений</div>
+                <div style={styles.noImage}>Нет изображений</div>
               )}
             </div>
 
             {/* Текст и реакции/редактирование */}
-            <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={styles.contentSection}>
               {editingIndex === index ? (
                 <>
                   <textarea
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
                     rows={4}
-                    style={{ width: '100%', resize: 'vertical' }}
+                    style={styles.editTextarea}
                   />
                   {isAdmin && (
-                    <div style={{ marginTop: '10px' }}>
+                    <div style={styles.adminButtons}>
                       <button
                         onClick={() => document.getElementById(`editFileInput-${index}`).click()}
-                        style={{ fontSize: '20px', cursor: 'pointer' }}
+                        style={styles.iconButton}
                         title="Прикрепить файлы"
                       >
                         📎
@@ -327,30 +306,23 @@ function ArticlesPage({ isAdmin }) {
                       <input
                         type="file"
                         multiple
-                        style={{ display: 'none' }}
+                        style={styles.fileInput}
                         id={`editFileInput-${index}`}
                         onChange={(e) => handleAttachFileForEdit(index, e.target.files)}
                       />
                     </div>
                   )}
                   {/* Вложения с возможностью удаления */}
-                  <div style={{ marginTop: '10px' }}>
+                  <div style={styles.attachmentsBlock}>
                     <h4>Прикреплённые файлы:</h4>
                     {articles[index].attachments && articles[index].attachments.length > 0 ? (
-                      <ul>
+                      <ul style={styles.attachmentsList}>
                         {articles[index].attachments.map((file, fileIdx) => (
-                          <li key={fileIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <li key={fileIdx} style={styles.attachmentItem}>
                             {getFileIcon(file.name)} {file.name}
                             <button
                               onClick={() => handleRemoveAttachment(index, fileIdx)}
-                              style={{
-                                background: 'red',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                padding: '2px 8px'
-                              }}
+                              style={styles.deleteButton}
                             >
                               Удалить
                             </button>
@@ -361,26 +333,21 @@ function ArticlesPage({ isAdmin }) {
                       <p>Нет вложений</p>
                     )}
                   </div>
-                  <div style={{ marginTop: '10px' }}>
-                    <button onClick={() => handleSaveEdit(index)} style={{ marginRight: '10px' }}>Сохранить</button>
-                    <button onClick={() => setEditingIndex(null)}>Отмена</button>
+                  <div style={styles.editButtons}>
+                    <button onClick={() => handleSaveEdit(index)} style={styles.smallButton}>Сохранить</button>
+                    <button onClick={() => setEditingIndex(null)} style={styles.smallButton}>Отмена</button>
                   </div>
                 </>
               ) : (
                 <>
-                  <p style={{ margin: 0 }}>{article.text}</p>
-                  {/* Реакции */}
+                  <p style={styles.articleText}>{article.text}</p>
+                  {/* Реакции — только для пользователей */}
                   {!isAdmin && (
                     <button
                       onClick={() => handleReaction(index, '❤️')}
                       style={{
-                        marginTop: '10px',
-                        fontSize: '20px',
-                        border: 'none',
-                        background: 'none',
-                        cursor: 'pointer',
-                        color: userReactions[index]?.includes('❤️') ? 'red' : 'black',
-                        outline: 'none',
+                        ...styles.reactionButton,
+                        color: userReactions[index]?.includes('❤️') ? 'red' : 'black'
                       }}
                       onMouseDown={(e) => e.preventDefault()}
                     >
@@ -388,10 +355,11 @@ function ArticlesPage({ isAdmin }) {
                     </button>
                   )}
 
+                  {/* Для админа — кнопки редактировать/удалить */}
                   {isAdmin && (
-                    <div style={{ marginTop: '10px' }}>
-                      <button onClick={() => handleEditClick(index)} style={{ marginRight: '10px' }}>Редактировать</button>
-                      <button onClick={() => handleDeleteArticle(index)}>Удалить</button>
+                    <div style={styles.adminButtons}>
+                      <button onClick={() => handleEditClick(index)} style={styles.smallButton}>Редактировать</button>
+                      <button onClick={() => handleDeleteArticle(index)} style={styles.smallButton}>Удалить</button>
                     </div>
                   )}
                 </>
@@ -403,5 +371,151 @@ function ArticlesPage({ isAdmin }) {
     </div>
   );
 }
+
+// Общие стили для адаптивности
+const styles = {
+  container: {
+    padding: '20px',
+    maxWidth: '1200px',
+    margin: '0 auto',
+  },
+  adminSection: {
+    marginBottom: '30px',
+  },
+  heading: {
+    marginBottom: '10px',
+  },
+  sectionTitle: {
+    marginBottom: '20px',
+    textAlign: 'center',
+  },
+  textarea: {
+    width: '100%',
+    resize: 'vertical',
+    padding: '8px',
+    fontSize: '16px',
+    boxSizing: 'border-box',
+  },
+  fileSection: {
+    marginTop: '10px',
+  },
+  button: {
+    padding: '8px 12px',
+    fontSize: '16px',
+    cursor: 'pointer',
+  },
+  fileInput: {
+    display: 'none',
+  },
+  attachmentsPreview: {
+    marginTop: '10px',
+  },
+  attachmentsList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: 0,
+  },
+  attachmentsBlock: {
+    marginTop: '10px',
+  },
+  attachmentItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  deleteButton: {
+    background: 'red',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '2px 8px',
+    cursor: 'pointer',
+  },
+  editButtons: {
+    marginTop: '10px',
+  },
+  smallButton: {
+    padding: '6px 12px',
+    marginRight: '10px',
+    fontSize: '14px',
+  },
+  articleText: {
+    margin: 0,
+  },
+  reactionButton: {
+    marginTop: '10px',
+    fontSize: '20px',
+    border: 'none',
+    background: 'none',
+    cursor: 'pointer',
+    outline: 'none',
+  },
+  adminButtons: {
+    marginTop: '10px',
+    display: 'flex',
+    gap: '10px',
+  },
+  imageContainer: {
+    width: '100%',
+    height: '200px',
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  filesPreview: {
+    display: 'flex',
+    gap: '5px',
+    padding: '5px',
+  },
+  fileThumbnail: {
+    width: '50px',
+    height: '50px',
+    objectFit: 'cover',
+  },
+  noImage: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    backgroundColor: '#f0f0f0',
+    fontSize: '14px',
+    color: '#555',
+  },
+  contentSection: {
+    padding: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  editTextarea: {
+    width: '100%',
+    resize: 'vertical',
+    padding: '8px',
+    fontSize: '16px',
+    boxSizing: 'border-box',
+  },
+  articleCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    maxWidth: '100%',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  articlesContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '20px',
+    justifyContent: 'center',
+  },
+  // медиазапросы можно добавить через CSS или использовать inline стили с media queries
+};
+
+// В этом примере мы используем inline стили для быстрых адаптивных решений.
+// Для более профессиональной адаптивности рекомендуется вынести стили в CSS и использовать media queries.
 
 export default ArticlesPage;

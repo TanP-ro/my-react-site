@@ -26,72 +26,12 @@ function ArticlesPage({ isAdmin }) {
 
   const userId = getUserId();
 
-  // Загрузка лайков из localStorage
-  const [articles, setArticles] = useState(() => {
-    const storedLikes = localStorage.getItem('articleLikes');
-    if (storedLikes) {
-      const likesData = JSON.parse(storedLikes);
-      return initialArticles.map((article) => {
-        const articleLikes = likesData.find((item) => item.id === article.id);
-        if (articleLikes && Array.isArray(articleLikes.users)) {
-          const likesCount = articleLikes.users.length;
-          const userLiked = articleLikes.users.includes(userId);
-          return {
-            ...article,
-            likes: likesCount,
-            userLiked,
-          };
-        }
-        return {
-          ...article,
-          likes: 0,
-          userLiked: false,
-        };
-      });
-    }
-    // Изначально без лайков
-    return initialArticles.map((article) => ({
-      ...article,
-      likes: 0,
-      userLiked: false,
-    }));
-  });
+  // Объявляем состояние для статей
+  const [articles, setArticles] = useState(initialArticles);
 
   const [isAdding, setIsAdding] = useState(false);
   const [editArticleId, setEditArticleId] = useState(null);
   const [formData, setFormData] = useState({ title: '', content: '' });
-
-  // Обновление localStorage при изменении лайков
-  useEffect(() => {
-    const storedLikes = localStorage.getItem('articleLikes');
-    const likesData = storedLikes ? JSON.parse(storedLikes) : [];
-
-    const updatedLikesData = articles.map((article) => {
-      const existing = likesData.find((item) => item.id === article.id);
-      if (existing) {
-        // Обновляем массив пользователей
-        let users = existing.users || [];
-        if (article.userLiked && !users.includes(userId)) {
-          users = [...users, userId];
-        } else if (!article.userLiked && users.includes(userId)) {
-          users = users.filter((id) => id !== userId);
-        }
-        return {
-          ...existing,
-          id: article.id,
-          users,
-        };
-      } else {
-        // Создаем новую запись
-        return {
-          id: article.id,
-          users: article.userLiked ? [userId] : [],
-        };
-      }
-    });
-
-    localStorage.setItem('articleLikes', JSON.stringify(updatedLikesData));
-  }, [articles, userId]);
 
   const handleAddClick = () => {
     setFormData({ title: '', content: '' });
@@ -119,8 +59,6 @@ function ArticlesPage({ isAdmin }) {
         id: Date.now(),
         title: formData.title,
         content: formData.content,
-        likes: 0,
-        userLiked: false,
       };
       setArticles([newArticle, ...articles]);
       setIsAdding(false);
@@ -137,22 +75,7 @@ function ArticlesPage({ isAdmin }) {
     setFormData({ title: '', content: '' });
   };
 
-  const toggleLike = (id) => {
-    setArticles((prevArticles) =>
-      prevArticles.map((article) => {
-        if (article.id === id) {
-          const liked = !article.userLiked;
-          const newLikes = liked ? article.likes + 1 : Math.max(article.likes - 1, 0);
-          return {
-            ...article,
-            likes: newLikes,
-            userLiked: liked,
-          };
-        }
-        return article;
-      })
-    );
-  };
+  // Убрали весь код лайков
 
   return (
     <div style={{ padding: '40px', maxWidth: '1000px', margin: '0 auto' }}>
@@ -233,23 +156,8 @@ function ArticlesPage({ isAdmin }) {
           >
             <h3 style={{ marginBottom: '10px' }}>{article.title}</h3>
             <p>{article.content}</p>
-            <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              {/* Кнопка лайка с золотистым сердечком */}
-              <button
-                onClick={() => toggleLike(article.id)}
-                style={{
-                  padding: '6px 12px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  backgroundColor: 'transparent',
-                  fontSize: '20px',
-                  color: '#FFD700', // Золотистый цвет
-                }}
-              >
-                {article.userLiked ? '♥' : '♡'} {article.likes}
-              </button>
+            <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+              {/* Удалили кнопку лайка */}
               {isAdmin && (
                 <>
                   <button

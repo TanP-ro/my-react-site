@@ -6,6 +6,7 @@ function ImageSlider({ images, interval = 3000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const total = images.length;
 
+  // Автоматическая прокрутка
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % total);
@@ -50,6 +51,7 @@ function ArticlesPage({ isAdmin }) {
 
   const fileInputRef = useRef(null);
 
+  // Загрузка данных из localStorage
   useEffect(() => {
     const storedArticles = localStorage.getItem('articles');
     if (storedArticles) setArticles(JSON.parse(storedArticles));
@@ -161,6 +163,7 @@ function ArticlesPage({ isAdmin }) {
     saveToLocalStorage(newArticles);
   };
 
+  // Обновленная функция лайка/дизлайка в стиле VK
   const handleReaction = (index, reaction) => {
     const userReactsForArticle = userReactions[index] || [];
     const isReacted = userReactsForArticle.includes(reaction);
@@ -169,9 +172,11 @@ function ArticlesPage({ isAdmin }) {
     let updatedReacts;
 
     if (isReacted) {
+      // Удаляем реакцию
       updatedReacts = userReactsForArticle.filter(r => r !== reaction);
       newCounts[reaction] = Math.max((newCounts[reaction] || 1) - 1, 0);
     } else {
+      // Добавляем реакцию
       updatedReacts = [...userReactsForArticle, reaction];
       newCounts[reaction] = (newCounts[reaction] || 0) + 1;
     }
@@ -182,6 +187,7 @@ function ArticlesPage({ isAdmin }) {
     setReactionCounts(newReactionCounts);
     setUserReactions(newUserReactions);
 
+    // сохраняем
     localStorage.setItem('reactionCounts', JSON.stringify(newReactionCounts));
     localStorage.setItem('userReactions', JSON.stringify(newUserReactions));
   };
@@ -267,23 +273,17 @@ function ArticlesPage({ isAdmin }) {
       )}
 
       {/* Отображение статей */}
-      {/* Обновляем контейнер: делаем его flex и обернутым */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }} className="articles-container">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
         {articles.map((article, index) => (
-          <div
-            key={index}
-            style={{
-              flex: '1 1 100%',   // гибкая ширина
-              maxWidth: '400px', // ограничение ширины
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              background: '#fff'
-            }}
-            className="article-card"
-          >
+          <div key={index} style={{
+            width: '300px',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            background: '#fff'
+          }}>
             {/* Верхняя часть — изображение или слайдер без кнопок */}
             <div style={{ width: '100%', height: '200px', overflow: 'hidden' }}>
               {article.attachments && article.attachments.length > 0 ? (
@@ -391,11 +391,11 @@ function ArticlesPage({ isAdmin }) {
                         fontSize: '20px',
                         border: 'none',
                         background: 'none',
-                        cursor: 'pointer',
+                        cursor: 'pointer', // <-- убедиться, что есть
                         color: userReactions[index]?.includes('❤️') ? 'red' : 'black',
-                        outline: 'none',
+                        outline: 'none', // убрать возможный outline
                       }}
-                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseDown={(e) => e.preventDefault()} // чтобы убрать изменение курсора при нажатии
                     >
                       ❤️ {reactionCounts[index]?.['❤️'] || 0}
                     </button>
@@ -416,5 +416,4 @@ function ArticlesPage({ isAdmin }) {
     </div>
   );
 }
-
 export default ArticlesPage;

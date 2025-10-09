@@ -38,14 +38,13 @@ function ArticlesPage({ isAdmin }) {
 
   const fileInputRef = useRef(null);
 
-  // Загрузка данных из localStorage при монтировании компонента
+  // Загрузка данных из localStorage при монтировании
   useEffect(() => {
     const storedArticles = localStorage.getItem('articles');
     if (storedArticles) {
       try {
-        const parsedArticles = JSON.parse(storedArticles);
-        setArticles(parsedArticles);
-      } catch(e) {
+        setArticles(JSON.parse(storedArticles));
+      } catch (e) {
         console.error('Ошибка парсинга articles:', e);
       }
     }
@@ -55,19 +54,14 @@ function ArticlesPage({ isAdmin }) {
     if (storedUserReactions) setUserReactions(JSON.parse(storedUserReactions));
   }, []);
 
-  // Функция сохранения статей
   const saveToLocalStorage = (articlesArray) => {
     localStorage.setItem('articles', JSON.stringify(articlesArray));
   };
 
-  // Открытие диалога выбора файлов
   const handleOpenFileDialog = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  // Обработка выбора файлов для новых статей
   const handleAttachFileForNew = (files) => {
     const fileArray = Array.from(files);
     const readerPromises = fileArray.map(file => {
@@ -82,13 +76,11 @@ function ArticlesPage({ isAdmin }) {
     });
   };
 
-  // Добавление новой статьи
   const handleAddArticle = () => {
     if (newArticleText.trim() !== '') {
       const newArticle = {
         text: newArticleText,
         attachments: tempAttachments,
-        attachmentsCount: tempAttachments.length
       };
       const newArticles = [...articles, newArticle];
       setArticles(newArticles);
@@ -100,7 +92,6 @@ function ArticlesPage({ isAdmin }) {
     }
   };
 
-  // Удаление статьи
   const handleDeleteArticle = (index) => {
     const newArticles = [...articles];
     newArticles.splice(index, 1);
@@ -117,11 +108,11 @@ function ArticlesPage({ isAdmin }) {
     setUserReactions(newUserReactions);
   };
 
-  // Редактирование статьи
   const handleEditClick = (index) => {
     setEditingIndex(index);
     setEditText(articles[index].text);
   };
+
   const handleSaveEdit = (index) => {
     const newArticles = [...articles];
     newArticles[index] = { ...newArticles[index], text: editText };
@@ -130,7 +121,6 @@ function ArticlesPage({ isAdmin }) {
     setEditingIndex(null);
   };
 
-  // Обработка прикрепления файлов при редактировании
   const handleAttachFileForEdit = (index, files) => {
     const fileArray = Array.from(files);
     const readerPromises = fileArray.map(file => {
@@ -143,17 +133,17 @@ function ArticlesPage({ isAdmin }) {
     Promise.all(readerPromises).then(newFiles => {
       const newArticles = [...articles];
       if (!newArticles[index]) return;
-      if (!newArticles[index].attachments) {
-        newArticles[index].attachments = [];
-      }
-      newArticles[index].attachments = [...newArticles[index].attachments, ...newFiles];
-      newArticles[index].attachmentsCount = newArticles[index].attachments.length;
+      const existingAttachments = newArticles[index].attachments || [];
+      newArticles[index] = {
+        ...newArticles[index],
+        attachments: [...existingAttachments, ...newFiles],
+        attachmentsCount: (existingAttachments.length + newFiles.length),
+      };
       setArticles(newArticles);
       saveToLocalStorage(newArticles);
     });
   };
 
-  // Удаление вложений
   const handleRemoveAttachment = (articleIndex, attachmentIndex) => {
     const newArticles = [...articles];
     const attachments = [...(newArticles[articleIndex].attachments || [])];
@@ -167,7 +157,6 @@ function ArticlesPage({ isAdmin }) {
     saveToLocalStorage(newArticles);
   };
 
-  // Обработка реакции
   const handleReaction = (index, reaction) => {
     const userReactsForArticle = userReactions[index] || [];
     const isReacted = userReactsForArticle.includes(reaction);
@@ -287,8 +276,8 @@ function ArticlesPage({ isAdmin }) {
             <div style={{ width: '100%', height: '200px', overflow: 'hidden' }}>
               {article.attachments && article.attachments.length > 0 ? (
                 (() => {
-                  const images = article.attachments.filter(f => f.data && f.data.startsWith('data:image'));
-                  const otherFiles = article.attachments.filter(f => !(f.data && f.data.startsWith('data:image')));
+                  const images = (article.attachments || []).filter(f => f.data && f.data.startsWith('data:image'));
+                  const otherFiles = (article.attachments || []).filter(f => !(f.data && f.data.startsWith('data:image')));
                   if (images.length > 1) {
                     return <ImageSlider images={images} interval={3000} />;
                   } else if (images.length === 1) {

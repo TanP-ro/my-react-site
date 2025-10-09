@@ -112,7 +112,7 @@ function App() {
       </header>
 
       {/* Основной контент */}
-      <div style={{ flex: 1, padding: '20px' }}>
+      <div style={{ flex: 1}}>
         <Routes>
           <Route
             path="/"

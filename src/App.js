@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 
 import AboutPage from './components/AboutPage';
 import ServicesPage from './components/ServicesPage';
@@ -26,7 +26,6 @@ function App() {
 
   const navigate = useNavigate();
 
-  // при монтировании читаем из localStorage
   useEffect(() => {
     const storedLogin = localStorage.getItem('isLoggedIn');
     const storedAdmin = localStorage.getItem('isAdmin');
@@ -35,7 +34,6 @@ function App() {
       setIsLoggedIn(true);
       setIsAdmin(storedAdmin === 'true');
     }
-    // Имитируем задержку загрузки - 1 секунда
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
@@ -48,7 +46,7 @@ function App() {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('isAdmin', adminStatus ? 'true' : 'false');
-    navigate('/'); // После входа возвращаемся на главную
+    navigate('/'); // Возврат на главную
   };
 
   const handleLogout = () => {
@@ -56,7 +54,7 @@ function App() {
     setIsAdmin(false);
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isAdmin');
-    navigate('/'); // После выхода на главную
+    navigate('/'); // После выхода
   };
 
   const toggleMenu = () => {
@@ -72,19 +70,17 @@ function App() {
       {/* Хедер */}
       <header className="header">
         <div className="container" style={{ flex: 1 }}>
-          {/* Бургер */}
           <div className="burger-container">
             <button className="burger" onClick={toggleMenu} aria-label="Меню">☰</button>
             <h1 className="main-title">Psychological Help Studio</h1>
             <div className="header__logo-wrapper">
-            <img src="/my-react-site/image/attachment.jpg" alt="Логотип" width="84" height="84" />
+              <img src="/my-react-site/image/attachment.jpg" alt="Логотип" width="84" height="84" />
             </div>
           </div>
-          {/* Навигация */}
           <nav className={`menu ${menuOpen ? 'show' : ''}`}>
             <button className="menu__close" onClick={toggleMenu} aria-label="Закрыть меню">&times;</button>
             <ul className="menu__list">
-              <li><Link className="menu__link" to="/" onClick={toggleMenu}>Главная</Link></li>
+              <li><Link className="menu__link" to="/#" onClick={toggleMenu}>Главная</Link></li>
               <li><Link className="menu__link" to="/about" onClick={toggleMenu}>О психологе</Link></li>
               <li><Link className="menu__link" to="/services" onClick={toggleMenu}>Польза</Link></li>
               <li><Link className="menu__link" to="/articles" onClick={toggleMenu}>Статьи</Link></li>
@@ -95,7 +91,6 @@ function App() {
                   onClick={(e) => {
                     e.preventDefault();
                     toggleMenu();
-                    // прокрутка к футеру
                     document.getElementById('footer').scrollIntoView({ behavior: 'smooth' });
                   }}
                 >
@@ -117,53 +112,55 @@ function App() {
       </header>
 
       {/* Основной контент */}
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, padding: '20px' }}>
         <Routes>
-          <Route path="/" element={
-            <>
-              {/* Баннер */}
-              <section className="banner">
-                <img src="/my-react-site/image/one.png" style={{ height: '100%' }} alt="Фото баннера" className="banner__photo" />
-                <button
-                  className="askPsychologist"
-                  onClick={() => window.open('https://vk.com/waliripsy', '_blank')}
-                >
-                  Задать вопрос психологу
-                </button>
-                {/* Текст под баннером */}
-                <div className="banner__bottom-text">
-                  <p>
-                    Валерия Леонель! <br />
+          <Route
+            path="/"
+            element={
+              <>
+                {/* Баннер */}
+                <section className="banner">
+                  <img src="/my-react-site/image/one.png" style={{ height: '100%' }} alt="Фото баннера" className="banner__photo" />
+                  <button
+                    className="askPsychologist"
+                    onClick={() => window.open('https://vk.com/waliripsy', '_blank')}
+                  >
+                    Задать вопрос психологу
+                  </button>
+                  {/* Текст под баннером */}
+                  <div className="banner__bottom-text">
+                    <p>
+                      Валерия Леонель! <br />
+                      Практикующий психолог, полиграфолог, телесно-ориентированный психотерапевт, специалист по работе с психологическими травмами, мультимодальный супервизор.
+                    </p>
+                  </div>
+                </section>
+                {/* Остальной контент */}
+                <section className="banner__wrapper">
+                  <h2 id="banner__wrapper-title">Валерия Леонэль</h2>
+                  <p id="banner__wrapper-text">
                     Практикующий психолог, полиграфолог, телесно-ориентированный психотерапевт, специалист по работе с психологическими травмами, мультимодальный супервизор.
                   </p>
-                </div>
-              </section>
-              {/* Остальной контент */}
-              <section className="banner__wrapper">
-                <h2 id="banner__wrapper-title">Валерия Леонэль</h2>
-                <p id="banner__wrapper-text">
-                  Практикующий психолог, полиграфолог, телесно-ориентированный психотерапевт, специалист по работе с психологическими травмами, мультимодальный супервизор.
-                </p>
-              </section>
-            </>
-          } />
+                </section>
+              </>
+            }
+          />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/articles" element={<ArticlesPage isAdmin={isAdmin} />} />
-          {/* Страница логина */}
-          <Route path="/login" element={
-            isLoggedIn ? <Navigate to="/" /> : <LoginPage onLogin={handleLogin} />
-          } />
+          <Route
+            path="/login"
+            element={
+              isLoggedIn ? <Navigate to="/" /> : <LoginPage onLogin={handleLogin} />
+            }
+          />
         </Routes>
       </div>
 
       {/* Футер */}
-      <footer id="footer" className="footer">
+      <footer id="footer" className="footer" style={{ marginTop: 'auto' }}>
         <div className="footer__wrapper">
           <p className="footer__title">ПСИХОЛОГ | ВАЛЕРИЯ ЛЕОНЭЛЬ</p>
-          {/* Добавляем надпись "Контакты" */}
-
-
           <div className="footer__social">
             <h3 className="footer__contacts-title">Контакты</h3>
             <div className="footer__social-wrap">

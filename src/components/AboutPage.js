@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { HashRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 const AboutPage = () => {
   return (
     <div style={{ padding: '40px 20px', maxWidth: '900px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>

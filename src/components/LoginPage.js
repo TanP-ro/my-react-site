@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HashRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 
 function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');

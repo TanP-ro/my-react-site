@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 
+
+
 function ArticlesPage({ isAdmin }) {
   const initialArticles = [
     {
@@ -26,8 +28,25 @@ function ArticlesPage({ isAdmin }) {
 
   const userId = getUserId();
 
-  // Объявляем состояние для статей
-  const [articles, setArticles] = useState(initialArticles);
+  // Загружаем статьи из localStorage или используем начальные
+  const loadArticles = () => {
+    const stored = localStorage.getItem('articles');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return initialArticles;
+      }
+    }
+    return initialArticles;
+  };
+
+  const [articles, setArticles] = useState(loadArticles());
+
+  // Обновляем localStorage при изменении статей
+  useEffect(() => {
+    localStorage.setItem('articles', JSON.stringify(articles));
+  }, [articles]);
 
   const [isAdding, setIsAdding] = useState(false);
   const [editArticleId, setEditArticleId] = useState(null);
@@ -72,10 +91,7 @@ function ArticlesPage({ isAdmin }) {
       );
       setEditArticleId(null);
     }
-    setFormData({ title: '', content: '' });
   };
-
-  // Убрали весь код лайков
 
   return (
     <div style={{ padding: '40px', maxWidth: '1000px', margin: '0 auto' }}>
@@ -144,39 +160,42 @@ function ArticlesPage({ isAdmin }) {
       )}
 
       <div style={{ display: 'grid', gap: '20px' }}>
-        {articles.map((article) => (
-          <div
-            key={article.id}
-            style={{
-              background: '#fff',
-              padding: '20px',
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            }}
-          >
-            <h3 style={{ marginBottom: '10px' }}>{article.title}</h3>
-            <p>{article.content}</p>
-            <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {/* Удалили кнопку лайка */}
-              {isAdmin && (
-                <>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleEditClick(article)}
-                  >
-                    Редактировать
-                  </button>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(article.id)}
-                  >
-                    Удалить
-                  </button>
-                </>
-              )}
+        {articles.length > 0 ? (
+          articles.map((article) => (
+            <div
+              key={article.id}
+              style={{
+                background: '#fff',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              }}
+            >
+              <h3 style={{ marginBottom: '10px' }}>{article.title}</h3>
+              <p>{article.content}</p>
+              <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                {isAdmin && (
+                  <>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleEditClick(article)}
+                    >
+                      Редактировать
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(article.id)}
+                    >
+                      Удалить
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p style={{ textAlign: 'center' }}>Нет статей для отображения</p>
+        )}
       </div>
     </div>
   );

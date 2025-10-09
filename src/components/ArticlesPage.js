@@ -6,37 +6,24 @@ function ImageSlider({ images, interval = 3000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const total = images.length;
 
-  // Автоматическая прокрутка
   useEffect(() => {
+    if (total === 0) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % total);
+      setCurrentIndex(prev => (prev + 1) % total);
     }, interval);
     return () => clearInterval(timer);
   }, [total, interval]);
 
   if (total === 0) return null;
 
+  const currentImage = images[currentIndex];
+
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-      {images.map((img, index) => (
-        <img
-          key={index}
-          src={img.data}
-          alt={img.name}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            opacity: index === currentIndex ? 1 : 0,
-            transition: 'opacity 1s ease-in-out',
-            pointerEvents: index === currentIndex ? 'auto' : 'none'
-          }}
-        />
-      ))}
-    </div>
+    <img
+      src={currentImage.data}
+      alt={currentImage.name}
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
   );
 }
 
@@ -51,26 +38,36 @@ function ArticlesPage({ isAdmin }) {
 
   const fileInputRef = useRef(null);
 
-  // Загрузка данных из localStorage
+  // Загрузка данных из localStorage при монтировании компонента
   useEffect(() => {
     const storedArticles = localStorage.getItem('articles');
-    if (storedArticles) setArticles(JSON.parse(storedArticles));
+    if (storedArticles) {
+      try {
+        const parsedArticles = JSON.parse(storedArticles);
+        setArticles(parsedArticles);
+      } catch(e) {
+        console.error('Ошибка парсинга articles:', e);
+      }
+    }
     const storedReactions = localStorage.getItem('reactionCounts');
     if (storedReactions) setReactionCounts(JSON.parse(storedReactions));
     const storedUserReactions = localStorage.getItem('userReactions');
     if (storedUserReactions) setUserReactions(JSON.parse(storedUserReactions));
   }, []);
 
+  // Функция сохранения статей
   const saveToLocalStorage = (articlesArray) => {
     localStorage.setItem('articles', JSON.stringify(articlesArray));
   };
 
+  // Открытие диалога выбора файлов
   const handleOpenFileDialog = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
+  // Обработка выбора файлов для новых статей
   const handleAttachFileForNew = (files) => {
     const fileArray = Array.from(files);
     const readerPromises = fileArray.map(file => {
@@ -85,6 +82,7 @@ function ArticlesPage({ isAdmin }) {
     });
   };
 
+  // Добавление новой статьи
   const handleAddArticle = () => {
     if (newArticleText.trim() !== '') {
       const newArticle = {
@@ -95,31 +93,35 @@ function ArticlesPage({ isAdmin }) {
       const newArticles = [...articles, newArticle];
       setArticles(newArticles);
       saveToLocalStorage(newArticles);
-      const newIndex = newArticles.length - 1;
-      setReactionCounts(prev => ({ ...prev, [newIndex]: { '❤️': 0 } }));
+      // Инициализация реакций для новой статьи
+      setReactionCounts(prev => ({ ...prev, [newArticles.length - 1]: { '❤️': 0 } }));
       setNewArticleText('');
       setTempAttachments([]);
     }
   };
 
+  // Удаление статьи
   const handleDeleteArticle = (index) => {
     const newArticles = [...articles];
     newArticles.splice(index, 1);
     setArticles(newArticles);
     saveToLocalStorage(newArticles);
+
+    // Обновляем реакции
     const newReactionCounts = { ...reactionCounts };
     delete newReactionCounts[index];
     setReactionCounts(newReactionCounts);
+
     const newUserReactions = { ...userReactions };
     delete newUserReactions[index];
     setUserReactions(newUserReactions);
   };
 
+  // Редактирование статьи
   const handleEditClick = (index) => {
     setEditingIndex(index);
     setEditText(articles[index].text);
   };
-
   const handleSaveEdit = (index) => {
     const newArticles = [...articles];
     newArticles[index] = { ...newArticles[index], text: editText };
@@ -128,6 +130,7 @@ function ArticlesPage({ isAdmin }) {
     setEditingIndex(null);
   };
 
+  // Обработка прикрепления файлов при редактировании
   const handleAttachFileForEdit = (index, files) => {
     const fileArray = Array.from(files);
     const readerPromises = fileArray.map(file => {
@@ -150,6 +153,7 @@ function ArticlesPage({ isAdmin }) {
     });
   };
 
+  // Удаление вложений
   const handleRemoveAttachment = (articleIndex, attachmentIndex) => {
     const newArticles = [...articles];
     const attachments = [...(newArticles[articleIndex].attachments || [])];
@@ -163,7 +167,7 @@ function ArticlesPage({ isAdmin }) {
     saveToLocalStorage(newArticles);
   };
 
-  // Обновленная функция лайка/дизлайка в стиле VK
+  // Обработка реакции
   const handleReaction = (index, reaction) => {
     const userReactsForArticle = userReactions[index] || [];
     const isReacted = userReactsForArticle.includes(reaction);
@@ -187,7 +191,6 @@ function ArticlesPage({ isAdmin }) {
     setReactionCounts(newReactionCounts);
     setUserReactions(newUserReactions);
 
-    // сохраняем
     localStorage.setItem('reactionCounts', JSON.stringify(newReactionCounts));
     localStorage.setItem('userReactions', JSON.stringify(newUserReactions));
   };
@@ -209,7 +212,6 @@ function ArticlesPage({ isAdmin }) {
 
     return (
       <div style={{ marginTop: '10px' }}>
-        {/* миниатюры изображений */}
         {images.length > 0 && (
           <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
             {images.map((img, idx) => (
@@ -217,7 +219,6 @@ function ArticlesPage({ isAdmin }) {
             ))}
           </div>
         )}
-        {/* галерея для остальных файлов */}
         {otherFiles.length > 0 && (
           <ImageSlider images={otherFiles} />
         )}
@@ -225,72 +226,69 @@ function ArticlesPage({ isAdmin }) {
     );
   };
 
-  // основной JSX
   return (
     <div style={{ padding: '20px' }}>
-      <h1>Статьи</h1>
-
-      {isAdmin && (
-        <div style={{ marginBottom: '20px' }}>
-          <h2>Добавить новую статью</h2>
-          <input
-            type="text"
-            placeholder="Введите текст статьи"
-            value={newArticleText}
-            onChange={(e) => setNewArticleText(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-          />
-
-          {/* Файл + кнопка */}
-          <button
-            onClick={handleOpenFileDialog}
-            style={{ fontSize: '24px', cursor: 'pointer', marginRight: '10px' }}
-            title="Прикрепить файлы"
-          >
-            📎
-          </button>
-          <input
-            type="file"
-            multiple
-            style={{ display: 'none' }}
-            ref={fileInputRef}
-            onChange={(e) => handleAttachFileForNew(e.target.files)}
-          />
-
-          {/* выбранные файлы */}
-          {tempAttachments.length > 0 && (
-            <div>
-              <h4>Выбранные файлы:</h4>
-              <ul>
-                {tempAttachments.map((file, idx) => (
-                  <li key={idx}>{file.name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <button onClick={handleAddArticle} style={{ padding: '8px 16px' }}>Добавить</button>
-        </div>
-      )}
+      {/* Форма добавления новой статьи */}
+      <h2>Добавить статью</h2>
+      <textarea
+        placeholder="Введите текст статьи..."
+        value={newArticleText}
+        onChange={(e) => setNewArticleText(e.target.value)}
+        rows={3}
+        style={{ width: '100%', resize: 'vertical' }}
+      />
+      <div style={{ marginTop: '10px' }}>
+        <button onClick={handleOpenFileDialog}>Прикрепить файлы</button>
+        <input
+          type="file"
+          multiple
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={(e) => handleAttachFileForNew(e.target.files)}
+        />
+        {tempAttachments.length > 0 && (
+          <div style={{ marginTop: '10px' }}>
+            <strong>Прикрепленные файлы:</strong>
+            <ul>
+              {tempAttachments.map((file, idx) => (
+                <li key={idx}>{getFileIcon(file.name)} {file.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      <button onClick={handleAddArticle} style={{ marginTop: '10px' }}>Добавить статью</button>
 
       {/* Отображение статей */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+      <h3 style={{ marginTop: '30px' }}>Статьи</h3>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '20px',
+          justifyContent: 'center'
+        }}
+      >
         {articles.map((article, index) => (
-          <div key={index} style={{
-            width: '300px',
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            background: '#fff'
-          }}>
-            {/* Верхняя часть — изображение или слайдер без кнопок */}
+          <div
+            key={index}
+            style={{
+              width: '100%',
+              maxWidth: '300px',
+              border: '1px solid #ccc',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              background: '#fff'
+            }}
+          >
+            {/* Верхняя часть - изображение или слайдер */}
             <div style={{ width: '100%', height: '200px', overflow: 'hidden' }}>
               {article.attachments && article.attachments.length > 0 ? (
                 (() => {
                   const images = article.attachments.filter(f => f.data && f.data.startsWith('data:image'));
                   const otherFiles = article.attachments.filter(f => !(f.data && f.data.startsWith('data:image')));
-
                   if (images.length > 1) {
                     return <ImageSlider images={images} interval={3000} />;
                   } else if (images.length === 1) {
@@ -318,7 +316,7 @@ function ArticlesPage({ isAdmin }) {
               )}
             </div>
 
-            {/* Нижняя часть — текст и реакции/редактирование */}
+            {/* Текст и реакции/редактирование */}
             <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
               {editingIndex === index ? (
                 <>
@@ -346,7 +344,7 @@ function ArticlesPage({ isAdmin }) {
                       />
                     </div>
                   )}
-                  {/* список вложений с удалением */}
+                  {/* Вложения с возможностью удаления */}
                   <div style={{ marginTop: '10px' }}>
                     <h4>Прикреплённые файлы:</h4>
                     {articles[index].attachments && articles[index].attachments.length > 0 ? (
@@ -391,11 +389,11 @@ function ArticlesPage({ isAdmin }) {
                         fontSize: '20px',
                         border: 'none',
                         background: 'none',
-                        cursor: 'pointer', // <-- убедиться, что есть
+                        cursor: 'pointer',
                         color: userReactions[index]?.includes('❤️') ? 'red' : 'black',
-                        outline: 'none', // убрать возможный outline
+                        outline: 'none',
                       }}
-                      onMouseDown={(e) => e.preventDefault()} // чтобы убрать изменение курсора при нажатии
+                      onMouseDown={(e) => e.preventDefault()}
                     >
                       ❤️ {reactionCounts[index]?.['❤️'] || 0}
                     </button>
@@ -416,4 +414,5 @@ function ArticlesPage({ isAdmin }) {
     </div>
   );
 }
+
 export default ArticlesPage;

@@ -8,16 +8,14 @@ function ImageSlider({ images, interval = 3000 }) {
 
   // Автоматическая прокрутка
   useEffect(() => {
-    const storedArticles = localStorage.getItem('articles');
-    console.log('Загруженные статьи:', storedArticles);
-    if (storedArticles) setArticles(JSON.parse(storedArticles));
-    //...
-  }, []);
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % total);
+    }, interval);
+    return () => clearInterval(timer);
+  }, [total, interval]);
 
-  const saveToLocalStorage = (articlesArray) => {
-    console.log('Сохранение статей:', articlesArray);
-    localStorage.setItem('articles', JSON.stringify(articlesArray));
-  };
+  if (total === 0) return null;
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       {images.map((img, index) => (

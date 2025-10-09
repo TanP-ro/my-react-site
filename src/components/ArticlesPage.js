@@ -1,44 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
-
-// Компонент ImageSlider с автоматической прокруткой, без кнопок навигации
-function ImageSlider({ images, interval = 3000 }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const total = images.length;
-
-  // Автоматическая прокрутка
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % total);
-    }, interval);
-    return () => clearInterval(timer);
-  }, [total, interval]);
-
-  if (total === 0) return null;
-
-  return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-      {images.map((img, index) => (
-        <img
-          key={index}
-          src={img.data}
-          alt={img.name}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            opacity: index === currentIndex ? 1 : 0,
-            transition: 'opacity 1s ease-in-out',
-            pointerEvents: index === currentIndex ? 'auto' : 'none'
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 function ArticlesPage({ isAdmin }) {
   const [articles, setArticles] = useState([]);
@@ -54,23 +14,46 @@ function ArticlesPage({ isAdmin }) {
   // Загрузка данных из localStorage
   useEffect(() => {
     const storedArticles = localStorage.getItem('articles');
-    if (storedArticles) setArticles(JSON.parse(storedArticles));
+    console.log('Загруженные статьи из localStorage:', storedArticles);
+    if (storedArticles) {
+      try {
+        const parsedArticles = JSON.parse(storedArticles);
+        setArticles(parsedArticles);
+      } catch (e) {
+        console.error('Ошибка парсинга articles:', e);
+      }
+    }
     const storedReactions = localStorage.getItem('reactionCounts');
-    if (storedReactions) setReactionCounts(JSON.parse(storedReactions));
+    if (storedReactions) {
+      try {
+        setReactionCounts(JSON.parse(storedReactions));
+      } catch (e) {
+        console.error('Ошибка парсинга reactionCounts:', e);
+      }
+    }
     const storedUserReactions = localStorage.getItem('userReactions');
-    if (storedUserReactions) setUserReactions(JSON.parse(storedUserReactions));
+    if (storedUserReactions) {
+      try {
+        setUserReactions(JSON.parse(storedUserReactions));
+      } catch (e) {
+        console.error('Ошибка парсинга userReactions:', e);
+      }
+    }
   }, []);
 
   const saveToLocalStorage = (articlesArray) => {
+    console.log('Сохраняем статьи:', articlesArray);
     localStorage.setItem('articles', JSON.stringify(articlesArray));
   };
 
+  // Открытие диалога выбора файла
   const handleOpenFileDialog = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
+  // Обработка выбранных файлов для новой статьи
   const handleAttachFileForNew = (files) => {
     const fileArray = Array.from(files);
     const readerPromises = fileArray.map(file => {
@@ -85,6 +68,7 @@ function ArticlesPage({ isAdmin }) {
     });
   };
 
+  // Добавление новой статьи
   const handleAddArticle = () => {
     if (newArticleText.trim() !== '') {
       const newArticle = {
@@ -94,7 +78,10 @@ function ArticlesPage({ isAdmin }) {
       };
       const newArticles = [...articles, newArticle];
       setArticles(newArticles);
+      // Обновляем localStorage
       saveToLocalStorage(newArticles);
+      
+      // Обновляем реакции для новой статьи
       const newIndex = newArticles.length - 1;
       setReactionCounts(prev => ({ ...prev, [newIndex]: { '❤️': 0 } }));
       setNewArticleText('');
@@ -102,11 +89,13 @@ function ArticlesPage({ isAdmin }) {
     }
   };
 
+  // Удаление статьи
   const handleDeleteArticle = (index) => {
     const newArticles = [...articles];
     newArticles.splice(index, 1);
     setArticles(newArticles);
     saveToLocalStorage(newArticles);
+    // Обновляем реакции
     const newReactionCounts = { ...reactionCounts };
     delete newReactionCounts[index];
     setReactionCounts(newReactionCounts);
@@ -115,11 +104,13 @@ function ArticlesPage({ isAdmin }) {
     setUserReactions(newUserReactions);
   };
 
+  // Редактирование статьи
   const handleEditClick = (index) => {
     setEditingIndex(index);
     setEditText(articles[index].text);
   };
 
+  // Сохранение редактированной статьи
   const handleSaveEdit = (index) => {
     const newArticles = [...articles];
     newArticles[index] = { ...newArticles[index], text: editText };
@@ -128,6 +119,7 @@ function ArticlesPage({ isAdmin }) {
     setEditingIndex(null);
   };
 
+  // Обработка прикрепления файлов при редактировании
   const handleAttachFileForEdit = (index, files) => {
     const fileArray = Array.from(files);
     const readerPromises = fileArray.map(file => {
@@ -150,6 +142,7 @@ function ArticlesPage({ isAdmin }) {
     });
   };
 
+  // Удаление вложений
   const handleRemoveAttachment = (articleIndex, attachmentIndex) => {
     const newArticles = [...articles];
     const attachments = [...(newArticles[articleIndex].attachments || [])];
@@ -163,7 +156,7 @@ function ArticlesPage({ isAdmin }) {
     saveToLocalStorage(newArticles);
   };
 
-  // Обновленная функция лайка/дизлайка в стиле VK
+  // Обработка реакции (лайка/дизлайка)
   const handleReaction = (index, reaction) => {
     const userReactsForArticle = userReactions[index] || [];
     const isReacted = userReactsForArticle.includes(reaction);
@@ -172,11 +165,11 @@ function ArticlesPage({ isAdmin }) {
     let updatedReacts;
 
     if (isReacted) {
-      // Удаляем реакцию
+      // Удаление реакции
       updatedReacts = userReactsForArticle.filter(r => r !== reaction);
       newCounts[reaction] = Math.max((newCounts[reaction] || 1) - 1, 0);
     } else {
-      // Добавляем реакцию
+      // Добавление реакции
       updatedReacts = [...userReactsForArticle, reaction];
       newCounts[reaction] = (newCounts[reaction] || 0) + 1;
     }
@@ -187,7 +180,7 @@ function ArticlesPage({ isAdmin }) {
     setReactionCounts(newReactionCounts);
     setUserReactions(newUserReactions);
 
-    // сохраняем
+    // Сохраняем в localStorage
     localStorage.setItem('reactionCounts', JSON.stringify(newReactionCounts));
     localStorage.setItem('userReactions', JSON.stringify(newUserReactions));
   };
@@ -290,7 +283,6 @@ function ArticlesPage({ isAdmin }) {
                 (() => {
                   const images = article.attachments.filter(f => f.data && f.data.startsWith('data:image'));
                   const otherFiles = article.attachments.filter(f => !(f.data && f.data.startsWith('data:image')));
-
                   if (images.length > 1) {
                     return <ImageSlider images={images} interval={3000} />;
                   } else if (images.length === 1) {
@@ -391,11 +383,11 @@ function ArticlesPage({ isAdmin }) {
                         fontSize: '20px',
                         border: 'none',
                         background: 'none',
-                        cursor: 'pointer', // <-- убедиться, что есть
+                        cursor: 'pointer',
                         color: userReactions[index]?.includes('❤️') ? 'red' : 'black',
-                        outline: 'none', // убрать возможный outline
+                        outline: 'none',
                       }}
-                      onMouseDown={(e) => e.preventDefault()} // чтобы убрать изменение курсора при нажатии
+                      onMouseDown={(e) => e.preventDefault()}
                     >
                       ❤️ {reactionCounts[index]?.['❤️'] || 0}
                     </button>
@@ -416,4 +408,5 @@ function ArticlesPage({ isAdmin }) {
     </div>
   );
 }
+
 export default ArticlesPage;

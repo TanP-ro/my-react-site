@@ -1,8 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
 function ArticlesPage({ isAdmin }) {
-  // Начальные статьи с лайками и статусом
   const initialArticles = [
     {
       id: 1,
@@ -16,22 +14,41 @@ function ArticlesPage({ isAdmin }) {
     },
   ];
 
+  // Получить или сгенерировать уникальный ID пользователя
+  const getUserId = () => {
+    let userId = localStorage.getItem('userId');
+    if (!userId) {
+      userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('userId', userId);
+    }
+    return userId;
+  };
+
+  const userId = getUserId();
+
   const [articles, setArticles] = useState(() => {
-    // Попытка загрузить лайки из localStorage
     const storedLikes = localStorage.getItem('articleLikes');
     if (storedLikes) {
       const likesData = JSON.parse(storedLikes);
-      // Объединяем с начальными статьями
+      // фильтруем лайки по текущему пользователю или создаем новые
       return initialArticles.map((article) => {
-        const stored = likesData.find((item) => item.id === article.id);
+        const userLikes = likesData.find((item) => item.id === article.id);
+        if (userLikes && userLikes.likes && userLikes.users && userLikes.users.includes(userId)) {
+          // пользователь лайкал эту статью
+          return {
+            ...article,
+            likes: userLikes.likes,
+            userLiked: true,
+          };
+        }
         return {
           ...article,
-          likes: stored ? stored.likes : 0,
-          userLiked: stored ? stored.userLiked : false,
+          likes: userLikes ? userLikes.likes : 0,
+          userLiked: false,
         };
       });
     }
-    // Если ничего не в localStorage, создаем с нуля
+    // Изначально все лайки 0 и без лайков у пользователя
     return initialArticles.map((article) => ({
       ...article,
       likes: 0,
@@ -45,9 +62,41 @@ function ArticlesPage({ isAdmin }) {
 
   // Обновление localStorage при изменении лайков
   useEffect(() => {
-    const dataToStore = articles.map(({ id, likes, userLiked }) => ({ id, likes, userLiked }));
-    localStorage.setItem('articleLikes', JSON.stringify(dataToStore));
-  }, [articles]);
+    // получаем текущие данные
+    const storedLikes = localStorage.getItem('articleLikes');
+    const likesData = storedLikes ? JSON.parse(storedLikes) : [];
+
+    const updatedLikesData = articles.map((article) => {
+      const existing = likesData.find((item) => item.id === article.id);
+      if (existing) {
+        // обновляем лайки и добавляем пользователя, если лайк поставил
+        const users = existing.users || [];
+        if (article.userLiked && !users.includes(userId)) {
+          users.push(userId);
+        } else if (!article.userLiked && users.includes(userId)) {
+          // если лайк снят, удаляем пользователя
+          const index = users.indexOf(userId);
+          if (index > -1) {
+            users.splice(index, 1);
+          }
+        }
+        return {
+          ...existing,
+          likes: article.likes,
+          users,
+        };
+      } else {
+        // создаем новую запись
+        return {
+          id: article.id,
+          likes: article.likes,
+          users: article.userLiked ? [userId] : [],
+        };
+      }
+    });
+
+    localStorage.setItem('articleLikes', JSON.stringify(updatedLikesData));
+  }, [articles, userId]);
 
   const handleAddClick = () => {
     setFormData({ title: '', content: '' });

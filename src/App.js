@@ -77,7 +77,7 @@ function App() {
             <button className="burger" onClick={toggleMenu} aria-label="Меню">☰</button>
             <h1 className="main-title">Psychological Help Studio</h1>
             <div className="header__logo-wrapper">
-            <img src="/image/attachment.jpg" alt="Логотип" width="84" height="84" />
+            <img src="/my-react-site/image/attachment.jpg" alt="Логотип" width="84" height="84" />
             </div>
           </div>
           {/* Навигация */}
@@ -123,7 +123,7 @@ function App() {
             <>
               {/* Баннер */}
               <section className="banner">
-                <img src="/image/one.png" style={{ height: '100%' }} alt="Фото баннера" className="banner__photo" />
+                <img src="/my-react-site/image/one.png" style={{ height: '100%' }} alt="Фото баннера" className="banner__photo" />
                 <button
                   className="askPsychologist"
                   onClick={() => window.open('https://vk.com/waliripsy', '_blank')}
@@ -172,14 +172,14 @@ function App() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img src="image/logo-vk-z.png" alt="ВКонтакте" width="64" height="64" />
+                <img src="/my-react-site/image/logo-vk-z.png" alt="ВКонтакте" width="64" height="64" />
               </a>
               <a
                 href="https://t.me/freeleoness"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img src="image/icons8-телеграм-64.png" alt="Телеграм" width="64" height="64" />
+                <img src="/my-react-site/image/icons8-телеграм-64.png" alt="Телеграм" width="64" height="64" />
               </a>
             </div>
           </div>

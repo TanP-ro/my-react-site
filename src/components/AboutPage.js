@@ -10,7 +10,7 @@ const AboutPage = () => {
       {/* Фото с слоганом */}
       <div style={{ position: 'relative', width: '500px', margin: '0 auto 30px' }}>
         <img
-          src="image/image-2.jpeg"
+          src="/my-react-site/image/image-two.jpeg"
           alt="Фото на кресле Валерия Леонэль"
           style={{
             width: '100%',

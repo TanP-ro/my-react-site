@@ -5,6 +5,7 @@ import AboutPage from './components/AboutPage';
 import ServicesPage from './components/ServicesPage';
 import ArticlesPage from './components/ArticlesPage';
 
+
 import LoginPage from './components/LoginPage'; // Ваша страница входа
 
 import './styles.css';
@@ -13,7 +14,13 @@ import './styles.css';
 function Preloader() {
   return (
     <div className="preloader">
-      <div className="spinner"></div>
+      <div className="spinner">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
     </div>
   );
 }

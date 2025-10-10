@@ -249,29 +249,50 @@ li button:hover {
 .banner {
   position: relative;
   width: 100%;
-  height: 1500px;
+  height: 1890px;
 
+  @media(max-width: 1380px) {
+    height: 1812px;
+  }
+  @media(max-width: 1261px) {
+    height: 1659px;
+  }
+  @media(max-width: 1200px) {
+    height: 1478px;
+  }
+  @media(max-width: 990px) {
+    height: 1300px;
+  }
+   @media(max-width: 871px) {
+    height: 1144px;
+  }
+
+     @media(max-width: 780px) {
+    height: 1013px;
+  }
   @media(max-width: 670px) {
     height: 869px;
   }
-   @media(max-width: 525px) {
+
+  @media(max-width: 525px) {
     height: 677px;
   }
 
-   @media(max-width: 485px) {
-  height: 636px;
-    
+  @media(max-width: 485px) {
+    height: 636px;
+
   }
 
-    @media(max-width: 440px) {
-   height: 560px;
+  @media(max-width: 440px) {
+    height: 560px;
   }
 
   @media(max-width: 380px) {
-     height: 498px;
+    height: 498px;
   }
-   @media(max-width: 340px) {
-     height: 421px;
+
+  @media(max-width: 340px) {
+    height: 421px;
   }
 }
 
@@ -330,15 +351,15 @@ li button:hover {
   @media(max-width: 525px) {
     font-size: 8px;
     max-width: 180px;
- 
+
   }
 
   @media(max-width: 485px) {
     font-size: 7px;
     max-width: 150px;
     padding: 10px;
-       bottom: 8%;
-    
+    bottom: 8%;
+
   }
 
   @media(max-width: 440px) {
@@ -350,8 +371,9 @@ li button:hover {
     font-size: 5px;
     max-width: 110px;
   }
-   @media(max-width: 340px) {
-bottom: 9%;
+
+  @media(max-width: 340px) {
+    bottom: 9%;
   }
 }
 
@@ -792,70 +814,63 @@ ul {
   left: 0;
   width: 100%;
   height: 100%;
-  background: #ffffff;
-  /* белый фон */
+  background: #fff; /* белый фон */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  /* Удалите или закомментируйте анимацию fadeOut, чтобы не было исчезания при загрузке */
-  /* animation: fadeOut 0.5s ease-in-out 0.5s forwards; */
 }
-
-
-/* Анимация исчезновения */
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-/* Спиннер в теплых пастельных тонах */
 
 .spinner {
-  width: 80px;
-  height: 80px;
+  position: relative;
+  width: 100px;
+  height: 100px;
+  animation: spin 1.5s linear infinite; /* вращается весь круг */
+}
+
+/* Каждая точка */
+.spinner div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   border-radius: 50%;
-  /* Золотистый градиент */
-  background: conic-gradient(#FFD700 0deg 120deg,
-      /* Золото */
-      #FFC107 120deg 240deg,
-      /* Янтарь */
-      #FFA500 240deg 360deg
-      /* Оранжевый, тоже в теплых тонах */
-    );
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  animation: spin 1s linear infinite;
+  background-color: #ffb347; /* цвет точек */
+  transform-origin: center;
 }
 
-/* Вращение спиннера */
+/* Расположение точек по кругу с помощью transform */
+.spinner div:nth-child(1) {
+  width: 8px; height: 8px;
+  transform: translate(0, -40px) rotate(0deg) translateY(-40px);
+}
+.spinner div:nth-child(2) {
+  width: 10px; height: 10px;
+  transform: translate(0, -40px) rotate(72deg) translateY(-40px);
+}
+.spinner div:nth-child(3) {
+  width: 12px; height: 12px;
+  transform: translate(0, -40px) rotate(144deg) translateY(-40px);
+}
+.spinner div:nth-child(4) {
+  width: 9px; height: 9px;
+  transform: translate(0, -40px) rotate(216deg) translateY(-40px);
+}
+.spinner div:nth-child(5) {
+  width: 11px; height: 11px;
+  transform: translate(0, -40px) rotate(288deg) translateY(-40px);
+}
+
+/* Анимация вращения всей группы */
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-} 
-
-.btn {
-  padding: 10px 20px;
-  border: 2px solid; /* добавляем бордер */
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
-  background: transparent; /* без фона */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-
 /* Теплый персиковый бордер */
 .btn-primary {
   border-color: #d4a373;
   color: #d4a373;
 }
+
 .btn-primary:hover {
   background-color: #d4a373;
   color: #fff;
@@ -866,6 +881,7 @@ ul {
   border-color: #c79b7b;
   color: #c79b7b;
 }
+
 .btn-success:hover {
   background-color: #c79b7b;
   color: #fff;
@@ -876,6 +892,7 @@ ul {
   border-color: #d2b48c;
   color: #d2b48c;
 }
+
 .btn-secondary:hover {
   background-color: #d2b48c;
   color: #fff;
@@ -886,6 +903,7 @@ ul {
   border-color: #e6a7a1;
   color: #e6a7a1;
 }
+
 .btn-danger:hover {
   background-color: #e6a7a1;
   color: #fff;

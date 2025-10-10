@@ -1,22 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
-
-
+import app from './firebase';
+import { ref, onValue, push, set } from 'firebase/database';
+import { db } from './firebase'; // Убедитесь, что путь правильный и что файл экспортирует db
 
 function ArticlesPage({ isAdmin }) {
-  const initialArticles = [
-    {
-      id: 1,
-      title: 'Как справляться со стрессом',
-      content: 'Советы по управлению стрессом и тревогой...',
-    },
-    {
-      id: 2,
-      title: 'Психология отношений',
-      content: 'Разбираемся в основах здоровых отношений...',
-    },
-  ];
-
   const getUserId = () => {
     let userId = localStorage.getItem('userId');
     if (!userId) {
@@ -28,29 +17,35 @@ function ArticlesPage({ isAdmin }) {
 
   const userId = getUserId();
 
-  // Загружаем статьи из localStorage или используем начальные
-  const loadArticles = () => {
-    const stored = localStorage.getItem('articles');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return initialArticles;
-      }
-    }
-    return initialArticles;
-  };
-
-  const [articles, setArticles] = useState(loadArticles());
-
-  // Обновляем localStorage при изменении статей
-  useEffect(() => {
-    localStorage.setItem('articles', JSON.stringify(articles));
-  }, [articles]);
-
+  const [articles, setArticles] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editArticleId, setEditArticleId] = useState(null);
   const [formData, setFormData] = useState({ title: '', content: '' });
+  const [loading, setLoading] = useState(true);
+
+  // Загрузка статей
+  useEffect(() => {
+    const articlesRef = ref(db, 'articles');
+    const unsubscribe = onValue(articlesRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log('Обновление данных из Firebase:', data);
+      if (data) {
+        const articlesArray = Object.keys(data).map((key) => ({
+          id: key,
+          ...data[key],
+        }));
+        const filteredArticles = isAdmin
+          ? articlesArray
+          : articlesArray.filter(article => article.published);
+        // Новые статьи сверху
+        setArticles(filteredArticles.slice().reverse());
+      } else {
+        setArticles([]);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [isAdmin]);
 
   const handleAddClick = () => {
     setFormData({ title: '', content: '' });
@@ -63,7 +58,8 @@ function ArticlesPage({ isAdmin }) {
   };
 
   const handleDelete = (id) => {
-    setArticles(articles.filter((article) => article.id !== id));
+    const deleteRef = ref(db, `articles/${id}`);
+    set(deleteRef, null);
   };
 
   const handleCancel = () => {
@@ -73,25 +69,39 @@ function ArticlesPage({ isAdmin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const articleData = {
+      title: formData.title,
+      content: formData.content,
+    };
+
+    if (isAdmin) {
+      articleData.published = true;
+    } else {
+      articleData.published = false;
+    }
+
     if (isAdding) {
-      const newArticle = {
-        id: Date.now(),
-        title: formData.title,
-        content: formData.content,
-      };
-      setArticles([newArticle, ...articles]);
-      setIsAdding(false);
+      const newRef = push(ref(db, 'articles'));
+      set(newRef, articleData).then(() => {
+        setIsAdding(false);
+      });
     } else if (editArticleId !== null) {
-      setArticles(
-        articles.map((article) =>
-          article.id === editArticleId
-            ? { ...article, title: formData.title, content: formData.content }
-            : article
-        )
-      );
-      setEditArticleId(null);
+      const editRef = ref(db, `articles/${editArticleId}`);
+      set(editRef, articleData).then(() => {
+        setEditArticleId(null);
+      });
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        {/* Прелоадер, можно заменить на любой другой компонент */}
+        <p>Загрузка...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '40px', maxWidth: '1000px', margin: '0 auto' }}>
@@ -173,24 +183,22 @@ function ArticlesPage({ isAdmin }) {
             >
               <h3 style={{ marginBottom: '10px' }}>{article.title}</h3>
               <p>{article.content}</p>
-              <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                {isAdmin && (
-                  <>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => handleEditClick(article)}
-                    >
-                      Редактировать
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(article.id)}
-                    >
-                      Удалить
-                    </button>
-                  </>
-                )}
-              </div>
+              {isAdmin && (
+                <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleEditClick(article)}
+                  >
+                    Редактировать
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDelete(article.id)}
+                  >
+                    Удалить
+                  </button>
+                </div>
+              )}
             </div>
           ))
         ) : (

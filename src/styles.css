@@ -508,12 +508,9 @@ d
 .blog-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 100px;
-  justify-content: center;
-  align-items: center;
-  padding: 80px 40px 40px 40px;
-
-  /* Можно изменить цвет фона */
+  gap: 90px;
+  padding: 40px 40px 40px 40px;
+ /* Можно изменить цвет фона */
   flex-wrap: wrap;
 
   /* Для адаптивности */
@@ -524,34 +521,37 @@ d
 .blog-left {
   display: flex;
   flex-direction: column;
-
-  align-items: flex-end;
-  min-height: 1vh;
-  height: 400px;
+  justify-content: flex-start;
+  align-items: center;
+  /* min-height: 1vh;
+  height: 400px; */
+  padding-top: 40px;
 
 }
 
 .blog-title {
-  font-size: 56px;
-  margin: 0 0 20px;
+      font-size: 56px;
+  margin: 0 0 80px 0;
+  padding-top: 20px;
   color: #333;
   /* Цвет заголовка */
 }
 
 .blog-description {
+text-align:center;
   font-size: 36px;
-  margin: 0 0 20px;
+  margin: 0 0 80px;
   color: #555;
 }
 
 /* Кнопка */
 .askPsychologist {
   display: inline-block;
-  margin-top: 15px;
-  max-width: 600px;
+margin: 0 0 20px 0;
+  max-width: 500px;
   width: 100%;
   padding: 23px;
-  font-size: 32px;
+  font-size: 30px;
   font-family: 'Poppins', sans-serif;
   color: #504d4c;
   background: linear-gradient(135deg, #d7ccc8, #ffe0b2);
@@ -560,7 +560,7 @@ d
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(255, 224, 160, 0.3);
   transition: all 0.3s ease;
-  margin-top: auto;
+  /* margin-top: auto; */
 }
 
 .askPsychologist:hover {
@@ -573,7 +573,6 @@ d
 
 /* Правая часть */
 .blog-right {
-
   display: flex;
   justify-content: flex-start;
   margin-top: 20px;
@@ -589,87 +588,19 @@ d
   object-fit: cover;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+.slogan {
 
-/* .askPsychologist {
-  display: inline-block;
-  margin-top: 15px;
-  max-width: 600px;
-  width: 100%;
-  padding: 36px;
-  font-size: 32px;
-  font-family: 'Poppins', sans-serif;
-  color: #504d4c;
-  background: linear-gradient(135deg, #d7ccc8, #ffe0b2);
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(255, 224, 160, 0.3);
-  transition: all 0.3s ease;
-  position: absolute;
-  bottom: 2%;
-  left: 11%;
+text-align: center;
+ font-family: 'Pacifico', cursive;
+  font-size: 28px;
+  color: #e6cab8; /* персиковый цвет */
+  text-align: center;
+  display: flex;
+margin: 0 auto;
 
-
-  @media(max-width: 1440px) {
-    bottom: 2%;
-    left: 2%;
-    font-size: 22px;
-    max-width: 500px;
-  }
-
-  @media(max-width: 1200px) {
-    max-width: 350px;
-    padding: 25px;
-  }
-
-  @media(max-width: 938px) {
-    font-size: 18px;
-    max-width: 300px;
-    bottom: 2%;
-  }
-
-  @media(max-width: 830px) {
-    font-size: 14px;
-    max-width: 250px;
-  }
-
-  @media(max-width: 670px) {
-    font-size: 12px;
-    max-width: 200px;
-    padding: 16px;
-  }
-
-  @media(max-width: 525px) {
-    font-size: 10px;
-    max-width: 180px;
-    padding: 14px;
-
-  }
-
-  @media(max-width: 485px) {
-    font-size: 9px;
-    max-width: 150px;
-    padding: 10px;
-  }
-
-  @media(max-width: 440px) {
-    font-size: 8px;
-    max-width: 130px;
-    padding: 9px;
-  }
-
-  @media(max-width: 380px) {
-    font-size: 5px;
-    max-width: 110px;
-  }
-} */
-
-.askPsychologist:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(255, 224, 160, 0.5);
-  background: linear-gradient(135deg, #ffe0b2, #d7ccc8);
-  /* смена градиента при наведении */
+ 
 }
+
 
 
 .banner__wrapper {
@@ -790,6 +721,10 @@ ul {
   .footer__social {
     margin-top: 15px;
   }
+}
+
+.footer-ok {
+  background: transparent;
 }
 
 /* Стиль для страницы входа */

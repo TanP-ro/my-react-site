@@ -170,21 +170,24 @@ function App() {
                   <div className="blog-left">
                     <h2 className="blog-title">Валерия Леонэль</h2>
                     <p className="blog-description">
-                      Психолог, психотерапевт, полиграфолог
+                      Психолог,<br />
+                      психотерапевт, полиграфолог
                     </p>
                     <button
                       className="askPsychologist"
-                      onClick={() => window.open('https://vk.com/waliripsy', '_blank')}
+                      onClick={() => window.open('https://t.me/wa_liri', '_blank')}
                     >
-                      Записаться к специалисту
+                      Задать вопрос специалисту
                     </button>
+                    {/* Новый слоган */}
+                    <div className="slogan">Здесь все о психологии души и тела</div>
                   </div>
                   {/* Правая часть: фотография */}
                   <div className="blog-right">
-                    <img className="profile-image"
+                    <img
+                      className="profile-image"
                       src="/my-react-site/image/photo-glav.jpeg"
                       alt="Фотография Валерии Леонэль"
-
                     />
                   </div>
                 </section>
@@ -228,6 +231,13 @@ function App() {
                   rel="noopener noreferrer"
                 >
                   <img src="/my-react-site/image/icons8-телеграм-64.png" alt="Телеграм" width="44" height="44" />
+                </a> 
+                   <a className='footer-ok'
+                  href="https://m.ok.ru/group/70000007284523"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src="/my-react-site/image/logo-ok2.jpg"  alt="Одноклассники" width="44" height="44" />
                 </a>
               </div>
             </div>
